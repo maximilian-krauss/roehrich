@@ -2,7 +2,6 @@ package input
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"net/url"
 
 	"github.com/pkg/errors"
@@ -24,11 +23,7 @@ func parseUrl(url string) (*ParsedUrl, error) {
 	return nil, errors.New("Nope")
 }
 
-func ValidateUrl(_ *cobra.Command, args []string) error {
-	if len(args) < 1 {
-		return errors.New("no url provided")
-	}
-	var maybeUrl = args[0]
+func ValidateUrl(maybeUrl string) error {
 	parsedUrl, err := url.ParseRequestURI(maybeUrl)
 	if err != nil {
 		return fmt.Errorf("is not a valid url: %s", err.Error())
