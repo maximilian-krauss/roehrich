@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/maximilian-krauss/roerich/config"
-	"github.com/maximilian-krauss/roerich/gitlab"
-	"github.com/maximilian-krauss/roerich/input"
-	"github.com/maximilian-krauss/roerich/utils"
+	"github.com/maximilian-krauss/roehrich/config"
+	"github.com/maximilian-krauss/roehrich/gitlab"
+	"github.com/maximilian-krauss/roehrich/input"
+	"github.com/maximilian-krauss/roehrich/utils"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -50,7 +50,8 @@ var rootCmd = &cobra.Command{
 		}
 
 		if mergeRequest.State != "opened" {
-			return fmt.Errorf("merge request is %s. aborting", mergeRequest.State)
+			log.Printf("merge request is already %s", mergeRequest.State)
+			return nil
 		} else {
 			log.Printf("merge request is in valid state: %s\n", mergeRequest.State)
 		}

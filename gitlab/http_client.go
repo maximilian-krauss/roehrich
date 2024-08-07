@@ -3,7 +3,7 @@ package gitlab
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/maximilian-krauss/roerich/config"
+	"github.com/maximilian-krauss/roehrich/config"
 	"io"
 	"net/http"
 	"net/url"

@@ -2,8 +2,8 @@ package gitlab
 
 import (
 	"errors"
-	"github.com/maximilian-krauss/roerich/config"
-	"github.com/maximilian-krauss/roerich/input"
+	"github.com/maximilian-krauss/roehrich/config"
+	"github.com/maximilian-krauss/roehrich/input"
 	"net/url"
 	"strconv"
 )
