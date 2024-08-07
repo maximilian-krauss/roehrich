@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/maximilian-krauss/roerich/config"
 	"github.com/maximilian-krauss/roerich/gitlab"
 	"github.com/maximilian-krauss/roerich/input"
@@ -27,11 +28,29 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if err := gitlab.CheckToken(cfg.Gitlab); err != nil {
+		mrInfo, err := input.GetMRInfo(args[0])
+		if err != nil {
 			return err
+		} else {
+			log.Printf("Found project name %s and merge request id %s", mrInfo.ProjectName, mrInfo.Id)
 		}
 
-		log.Println("Token verified")
+		if err := gitlab.CheckToken(cfg.Gitlab); err != nil {
+			return err
+		} else {
+			log.Println("access token verified")
+		}
+
+		mergeRequest, err := gitlab.GetMergeRequest(mrInfo, cfg.Gitlab)
+		if err != nil {
+			return err
+		} else {
+			log.Printf("Resolved merge request: %s\n", mergeRequest.Title)
+		}
+
+		if mergeRequest.State != "opened" {
+			return fmt.Errorf("merge request is %s. Aborting", mergeRequest.State)
+		}
 
 		return nil
 	},
