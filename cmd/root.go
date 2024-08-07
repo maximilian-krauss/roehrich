@@ -45,11 +45,27 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		} else {
-			log.Printf("Resolved merge request: %s\n", mergeRequest.Title)
+			log.Printf("resolved merge request: %s\n", mergeRequest.Title)
 		}
 
 		if mergeRequest.State != "opened" {
-			return fmt.Errorf("merge request is %s. Aborting", mergeRequest.State)
+			return fmt.Errorf("merge request is %s. aborting", mergeRequest.State)
+		} else {
+			log.Printf("merge request is in valid state: %s\n", mergeRequest.State)
+		}
+
+		/*isPipelineRunning := mergeRequest.Pipeline.Status == "running" || mergeRequest.Pipeline.Status == "pending"
+		if !isPipelineRunning {
+			log.Printf("pipeline is not running. current state: %s", mergeRequest.Pipeline.Status)
+			return nil
+		}*/
+
+		jobs, err := gitlab.GetJobs(mergeRequest, cfg.Gitlab)
+		if err != nil {
+			return err
+		}
+		for _, job := range jobs {
+			log.Printf("job: %s %s %s\n", job.Name, job.Stage, job.Status)
 		}
 
 		return nil

@@ -5,6 +5,7 @@ import (
 	"github.com/maximilian-krauss/roerich/config"
 	"github.com/maximilian-krauss/roerich/input"
 	"net/url"
+	"strconv"
 )
 
 type PersonalAccessTokenResponse struct {
@@ -36,9 +37,10 @@ type Pipeline struct {
 }
 
 type MergeRequest struct {
-	Title    string   `json:"title"`
-	State    string   `json:"state"`
-	Pipeline Pipeline `json:"head_pipeline"`
+	Title     string   `json:"title"`
+	State     string   `json:"state"`
+	Pipeline  Pipeline `json:"head_pipeline"`
+	ProjectId int      `json:"project_id"`
 }
 
 func GetMergeRequest(info *input.MergeRequestInfo, config config.GitlabConfig) (MergeRequest, error) {
@@ -47,4 +49,19 @@ func GetMergeRequest(info *input.MergeRequestInfo, config config.GitlabConfig) (
 	mergeRequest, err := Get(mrPath, config, mergeRequest)
 
 	return mergeRequest, err
+}
+
+type Job struct {
+	Id     int    `json:"id"`
+	Name   string `json:"name"`
+	Stage  string `json:"stage"`
+	Status string `json:"status"`
+}
+
+func GetJobs(mr MergeRequest, config config.GitlabConfig) ([]Job, error) {
+	var jobs = []Job{}
+	var jobsPath = "/projects/" + strconv.Itoa(mr.ProjectId) + "/pipelines/" + strconv.Itoa(mr.Pipeline.Id) + "/jobs"
+	jobs, err := GetMany(jobsPath, config, jobs)
+
+	return jobs, err
 }
