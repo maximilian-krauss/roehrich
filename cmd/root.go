@@ -5,6 +5,7 @@ import (
 	"github.com/maximilian-krauss/roerich/config"
 	"github.com/maximilian-krauss/roerich/gitlab"
 	"github.com/maximilian-krauss/roerich/input"
+	"github.com/maximilian-krauss/roerich/utils"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -54,18 +55,25 @@ var rootCmd = &cobra.Command{
 			log.Printf("merge request is in valid state: %s\n", mergeRequest.State)
 		}
 
-		/*isPipelineRunning := mergeRequest.Pipeline.Status == "running" || mergeRequest.Pipeline.Status == "pending"
+		isPipelineRunning := mergeRequest.Pipeline.Status == "running" || mergeRequest.Pipeline.Status == "pending"
 		if !isPipelineRunning {
 			log.Printf("pipeline is not running. current state: %s", mergeRequest.Pipeline.Status)
 			return nil
-		}*/
+		}
 
 		jobs, err := gitlab.GetJobs(mergeRequest, cfg.Gitlab)
 		if err != nil {
 			return err
 		}
-		for _, job := range jobs {
-			log.Printf("job: %s %s %s\n", job.Name, job.Stage, job.Status)
+		jobsGroupedByStage := utils.GroupByProperty(jobs, func(j gitlab.Job) string {
+			return j.Stage
+		})
+
+		for stage, group := range jobsGroupedByStage {
+			log.Println(fmt.Sprintf("=== %s ===", stage))
+			for _, job := range group {
+				log.Printf("%s: %s\n", job.Name, job.Status)
+			}
 		}
 
 		return nil
