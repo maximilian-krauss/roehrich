@@ -70,7 +70,7 @@ func Get[T any](path string, config config.GitlabConfig, responseType T) (T, err
 
 func GetMany[T any](path string, config config.GitlabConfig, responseType []T) ([]T, error) {
 	const perPage = 10
-	currentPage := 0
+	currentPage := 1
 	items := make([]T, 0)
 
 	for {
@@ -87,7 +87,6 @@ func GetMany[T any](path string, config config.GitlabConfig, responseType []T) (
 		if err != nil {
 			return responseType, err
 		}
-
 		if err := json.Unmarshal(body, &tBody); err != nil {
 			return responseType, err
 		}
