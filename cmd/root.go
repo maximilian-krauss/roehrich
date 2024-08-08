@@ -73,7 +73,7 @@ var rootCmd = &cobra.Command{
 		for stage, group := range jobsGroupedByStage {
 			log.Println(fmt.Sprintf("=== %s ===", stage))
 			for _, job := range group {
-				log.Printf("%s: %s\n", job.Name, job.Status)
+				log.Printf("%s  %s\n", utils.JobStatusToEmoji(job), job.Name)
 			}
 		}
 
