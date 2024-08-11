@@ -1,13 +1,13 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
+
 	"github.com/maximilian-krauss/roehrich/config"
 	"github.com/maximilian-krauss/roehrich/gitlab"
 	"github.com/maximilian-krauss/roehrich/input"
 	"github.com/maximilian-krauss/roehrich/utils"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 func onlyUrls(_ *cobra.Command, args []string) error {
@@ -56,9 +56,8 @@ var rootCmd = &cobra.Command{
 			log.Printf("merge request is in valid state: %s\n", mergeRequest.State)
 		}
 
-		isPipelineRunning := mergeRequest.Pipeline.Status == "running" || mergeRequest.Pipeline.Status == "pending"
-		if !isPipelineRunning {
-			log.Printf("pipeline is not running. current state: %s", mergeRequest.Pipeline.Status)
+		if mergeRequest.Pipeline.Status == "success" {
+			log.Printf("%s pipeline did already succeed", "✅")
 			return nil
 		}
 
@@ -71,9 +70,9 @@ var rootCmd = &cobra.Command{
 		})
 
 		for stage, group := range jobsGroupedByStage {
-			log.Println(fmt.Sprintf("=== %s ===", stage))
+			log.Printf("=== %s ===", stage)
 			for _, job := range group {
-				log.Printf("%s  %s\n", utils.JobStatusToEmoji(job), job.Name)
+				log.Printf("%s  %s\n", utils.JobStatusToEmoji(job.Status), job.Name)
 			}
 		}
 

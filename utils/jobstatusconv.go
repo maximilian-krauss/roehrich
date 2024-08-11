@@ -1,8 +1,6 @@
 package utils
 
-import "github.com/maximilian-krauss/roehrich/gitlab"
-
-func JobStatusToEmoji(job gitlab.Job) string {
+func JobStatusToEmoji(jobStatus string) string {
 	statusEmojiMap := map[string]string{
 		"created":              "⏳",
 		"running":              "▶️",
@@ -13,7 +11,7 @@ func JobStatusToEmoji(job gitlab.Job) string {
 		"waiting_for_resource": "🕝",
 		"manual":               "⚙️",
 	}
-	converted := statusEmojiMap[job.Status]
+	converted := statusEmojiMap[jobStatus]
 	if converted != "" {
 		return converted
 	}

@@ -2,10 +2,12 @@ package gitlab
 
 import (
 	"errors"
-	"github.com/maximilian-krauss/roehrich/config"
-	"github.com/maximilian-krauss/roehrich/input"
 	"net/url"
 	"strconv"
+
+	"github.com/maximilian-krauss/roehrich/config"
+	"github.com/maximilian-krauss/roehrich/input"
+	"github.com/maximilian-krauss/roehrich/utils"
 )
 
 type PersonalAccessTokenResponse struct {
@@ -52,10 +54,11 @@ func GetMergeRequest(info *input.MergeRequestInfo, config config.GitlabConfig) (
 }
 
 type Job struct {
-	Id     int    `json:"id"`
-	Name   string `json:"name"`
-	Stage  string `json:"stage"`
-	Status string `json:"status"`
+	Id        int               `json:"id"`
+	Name      string            `json:"name"`
+	Stage     string            `json:"stage"`
+	Status    string            `json:"status"`
+	CreatedAt utils.IsoDateTime `json:"created_at"`
 }
 
 func GetJobs(mr MergeRequest, config config.GitlabConfig) ([]Job, error) {
