@@ -3,13 +3,13 @@ package input
 import "testing"
 
 func TestGetMRInfoWithValidInput(t *testing.T) {
-	result, err := GetMRInfo("https://git.gitlabinstance.local/sub_group/project-name/-/merge_requests/1234/diffs?commit_id=8843d7f92416211de9ebb963ff4ce28125932878")
+	result, err := GetMRInfo("https://git.gitlabinstance.local/sub_group/long.project-name/-/merge_requests/1234/diffs?commit_id=8843d7f92416211de9ebb963ff4ce28125932878")
 	if err != nil {
 		t.Fatal(err)
 	}
 	var (
 		projectId   = "1234"
-		projectName = "sub_group/project-name"
+		projectName = "sub_group/long.project-name"
 	)
 	if result.Id != projectId {
 		t.Fatalf("wrong id: got %s, wanted %s", result.Id, projectId)

@@ -17,7 +17,7 @@ func GetMRInfo(suppliedUrl string) (*MergeRequestInfo, error) {
 		return nil, err
 	}
 
-	re := regexp.MustCompile(`\/*(?P<name>[a-z\/\-_]+)\/-\/merge_requests\/(?P<id>[0-9]+)`)
+	re := regexp.MustCompile(`\/*(?P<name>[a-z\.\/\-_]+)\/-\/merge_requests\/(?P<id>[0-9]+)`)
 	matches := re.FindStringSubmatch(parsedUrl.Path)
 
 	if matches == nil || len(matches) != 3 {
