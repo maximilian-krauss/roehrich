@@ -68,3 +68,17 @@ func GetJobs(mr MergeRequest, config config.GitlabConfig) ([]Job, error) {
 
 	return jobs, err
 }
+
+func isJobRunningOrPending(job Job) bool {
+	return job.Status == "created" || job.Status == "running" || job.Status == "waiting_for_resource"
+}
+
+func GetFinishedJobs(jobs []Job) []Job {
+	return utils.Filter(jobs, func(job Job) bool {
+		return !isJobRunningOrPending(job)
+	})
+}
+
+func GetPendingJobs(jobs []Job) []Job {
+	return utils.Filter(jobs, isJobRunningOrPending)
+}
