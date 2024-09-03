@@ -3,6 +3,7 @@ package utils
 func JobStatusToEmoji(jobStatus string) string {
 	statusEmojiMap := map[string]string{
 		"created":              "⏳",
+		"pending":              "⏳",
 		"running":              "▶️",
 		"failed":               "❌",
 		"success":              "✅",
