@@ -2,14 +2,12 @@ package gitlab
 
 import (
 	"errors"
-	"net/url"
-	"slices"
-	"strconv"
-	"strings"
-
 	"github.com/maximilian-krauss/roehrich/config"
 	"github.com/maximilian-krauss/roehrich/input"
 	"github.com/maximilian-krauss/roehrich/utils"
+	"net/url"
+	"slices"
+	"strconv"
 )
 
 type PersonalAccessTokenResponse struct {
@@ -67,13 +65,18 @@ type Job struct {
 }
 
 func GetJobs(mr MergeRequest, config config.GitlabConfig, jobStatuses []string) ([]Job, error) {
-	var jobs = []Job{}
+	var jobs []Job
 	var jobsPath = "/projects/" + strconv.Itoa(mr.ProjectId) + "/pipelines/" + strconv.Itoa(mr.Pipeline.Id) + "/jobs"
 	params := make(map[string]string)
-	if jobStatuses != nil {
-		params["scope"] = strings.Join(jobStatuses, ",")
-	}
 	jobs, err := GetMany(jobsPath, config, jobs, params)
+	if err != nil {
+		return nil, err
+	}
+	if jobStatuses != nil {
+		return utils.Filter(jobs, func(job Job) bool {
+			return slices.Contains(jobStatuses, job.Status)
+		}), nil
+	}
 
 	return jobs, err
 }

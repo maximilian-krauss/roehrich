@@ -24,9 +24,13 @@ func printGroupedJobs(jobs []gitlab.Job) {
 	for stage, group := range jobsGroupedByStage {
 		log.Printf("=== %s ===", stage)
 		for _, job := range group {
-			log.Printf("%s  %s\n", utils.JobStatusToEmoji(job.Status), job.Name)
+			printJob(job)
 		}
 	}
+}
+
+func printJob(job gitlab.Job) {
+	log.Printf("%s  %s\n", utils.JobStatusToEmoji(job.Status), job.Name)
 }
 
 var rootCmd = &cobra.Command{
@@ -79,6 +83,7 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		jobsToComplete := len(jobs)
 		printGroupedJobs(jobs)
 
 		finishedJobs := make(map[int]gitlab.Job)
@@ -96,7 +101,11 @@ var rootCmd = &cobra.Command{
 					continue
 				}
 				finishedJobs[job.Id] = job
-				log.Printf("update! %s  %s\n", utils.JobStatusToEmoji(job.Status), job.Name)
+				printJob(job)
+			}
+
+			if len(finishedJobs) >= jobsToComplete {
+				break
 			}
 
 			time.Sleep(10 * time.Second)

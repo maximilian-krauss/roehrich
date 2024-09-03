@@ -40,7 +40,6 @@ func makeRequest(config config.GitlabConfig, requestUrl string, queryParameter m
 	}
 
 	request, err := http.NewRequest("GET", requestUri.String(), nil)
-	println(requestUri.String())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -84,7 +83,7 @@ func Get[T any](path string, config config.GitlabConfig, responseType T, queryPa
 }
 
 func GetMany[T any](path string, config config.GitlabConfig, responseType []T, additionalQueryParameter map[string]string) ([]T, error) {
-	const perPage = 10
+	const perPage = 50
 	currentPage := 1
 	items := make([]T, 0)
 
