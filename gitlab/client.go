@@ -3,7 +3,9 @@ package gitlab
 import (
 	"errors"
 	"net/url"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/maximilian-krauss/roehrich/config"
 	"github.com/maximilian-krauss/roehrich/input"
@@ -18,7 +20,7 @@ type PersonalAccessTokenResponse struct {
 
 func CheckToken(config config.GitlabConfig) error {
 	var accessToken PersonalAccessTokenResponse
-	accessToken, err := Get("personal_access_tokens/self", config, accessToken)
+	accessToken, err := Get("personal_access_tokens/self", config, accessToken, nil)
 	if err != nil {
 		return err
 	}
@@ -45,10 +47,13 @@ type MergeRequest struct {
 	ProjectId int      `json:"project_id"`
 }
 
+var PendingOrRunningJobStatuses = []string{"created", "pending", "running", "waiting_for_resource"}
+var FinishedJobStatuses = []string{"failed", "canceled", "skipped", "success", "manual"}
+
 func GetMergeRequest(info *input.MergeRequestInfo, config config.GitlabConfig) (MergeRequest, error) {
 	var mergeRequest MergeRequest
 	var mrPath = "/projects/" + url.QueryEscape(info.ProjectName) + "/merge_requests/" + info.Id
-	mergeRequest, err := Get(mrPath, config, mergeRequest)
+	mergeRequest, err := Get(mrPath, config, mergeRequest, nil)
 
 	return mergeRequest, err
 }
@@ -61,24 +66,28 @@ type Job struct {
 	CreatedAt utils.IsoDateTime `json:"created_at"`
 }
 
-func GetJobs(mr MergeRequest, config config.GitlabConfig) ([]Job, error) {
+func GetJobs(mr MergeRequest, config config.GitlabConfig, jobStatuses []string) ([]Job, error) {
 	var jobs = []Job{}
 	var jobsPath = "/projects/" + strconv.Itoa(mr.ProjectId) + "/pipelines/" + strconv.Itoa(mr.Pipeline.Id) + "/jobs"
-	jobs, err := GetMany(jobsPath, config, jobs)
+	params := make(map[string]string)
+	if jobStatuses != nil {
+		params["scope"] = strings.Join(jobStatuses, ",")
+	}
+	jobs, err := GetMany(jobsPath, config, jobs, params)
 
 	return jobs, err
 }
 
 func isJobRunningOrPending(job Job) bool {
-	return job.Status == "created" || job.Status == "running" || job.Status == "waiting_for_resource"
+	return slices.Contains(PendingOrRunningJobStatuses, job.Status)
 }
 
-func GetFinishedJobs(jobs []Job) []Job {
+func FilterFinishedJobs(jobs []Job) []Job {
 	return utils.Filter(jobs, func(job Job) bool {
 		return !isJobRunningOrPending(job)
 	})
 }
 
-func GetPendingJobs(jobs []Job) []Job {
+func FilterPendingJobs(jobs []Job) []Job {
 	return utils.Filter(jobs, isJobRunningOrPending)
 }

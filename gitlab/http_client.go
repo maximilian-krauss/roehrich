@@ -3,10 +3,12 @@ package gitlab
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/maximilian-krauss/roehrich/config"
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
+
+	"github.com/maximilian-krauss/roehrich/config"
 )
 
 type ErrorResponse struct {
@@ -23,9 +25,22 @@ func parseAndReturnServerError(path string, responseBody []byte) error {
 	return fmt.Errorf("cannot get %s: %s", path, errorResponse.Message)
 }
 
-func makeRequest(config config.GitlabConfig, requestUrl string) (*http.Response, []byte, error) {
+func makeRequest(config config.GitlabConfig, requestUrl string, queryParameter map[string]string) (*http.Response, []byte, error) {
 	httpClient := http.Client{}
-	request, err := http.NewRequest("GET", requestUrl, nil)
+	requestUri, err := url.ParseRequestURI(requestUrl)
+	if err != nil {
+		return nil, nil, err
+	}
+	if queryParameter != nil {
+		query := requestUri.Query()
+		for key, value := range queryParameter {
+			query.Add(key, value)
+		}
+		requestUri.RawQuery = query.Encode()
+	}
+
+	request, err := http.NewRequest("GET", requestUri.String(), nil)
+	println(requestUri.String())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -50,14 +65,14 @@ func makeRequest(config config.GitlabConfig, requestUrl string) (*http.Response,
 	return response, body, nil
 }
 
-func Get[T any](path string, config config.GitlabConfig, responseType T) (T, error) {
+func Get[T any](path string, config config.GitlabConfig, responseType T, queryParameter map[string]string) (T, error) {
 	joinedUrl, err := url.JoinPath(config.BaseUrl, path)
 	if err != nil {
 		return responseType, err
 	}
 
 	var tBody T
-	_, body, err := makeRequest(config, joinedUrl)
+	_, body, err := makeRequest(config, joinedUrl, queryParameter)
 	if err != nil {
 		return responseType, err
 	}
@@ -68,7 +83,7 @@ func Get[T any](path string, config config.GitlabConfig, responseType T) (T, err
 	return tBody, nil
 }
 
-func GetMany[T any](path string, config config.GitlabConfig, responseType []T) ([]T, error) {
+func GetMany[T any](path string, config config.GitlabConfig, responseType []T, additionalQueryParameter map[string]string) ([]T, error) {
 	const perPage = 10
 	currentPage := 1
 	items := make([]T, 0)
@@ -79,10 +94,16 @@ func GetMany[T any](path string, config config.GitlabConfig, responseType []T) (
 			return responseType, err
 		}
 
+		queryParameter := map[string]string{"page": strconv.Itoa(currentPage), "per_page": strconv.Itoa(perPage)}
+		for key, value := range additionalQueryParameter {
+			queryParameter[key] = value
+		}
+
 		var tBody []T
 		response, body, err := makeRequest(
 			config,
-			fmt.Sprintf("%s?page=%d&per_page=%d", joinedUrl, currentPage, perPage),
+			joinedUrl,
+			queryParameter,
 		)
 		if err != nil {
 			return responseType, err

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"log"
+	"time"
 
 	"github.com/maximilian-krauss/roehrich/config"
 	"github.com/maximilian-krauss/roehrich/gitlab"
@@ -13,6 +14,19 @@ import (
 func onlyUrls(_ *cobra.Command, args []string) error {
 	maybeUrl := args[0]
 	return input.ValidateUrl(maybeUrl)
+}
+
+func printGroupedJobs(jobs []gitlab.Job) {
+	jobsGroupedByStage := utils.GroupByProperty(jobs, func(j gitlab.Job) string {
+		return j.Stage
+	})
+
+	for stage, group := range jobsGroupedByStage {
+		log.Printf("=== %s ===", stage)
+		for _, job := range group {
+			log.Printf("%s  %s\n", utils.JobStatusToEmoji(job.Status), job.Name)
+		}
+	}
 }
 
 var rootCmd = &cobra.Command{
@@ -61,19 +75,31 @@ var rootCmd = &cobra.Command{
 			return nil
 		}
 
-		jobs, err := gitlab.GetJobs(mergeRequest, cfg.Gitlab)
+		jobs, err := gitlab.GetJobs(mergeRequest, cfg.Gitlab, nil)
 		if err != nil {
 			return err
 		}
-		jobsGroupedByStage := utils.GroupByProperty(jobs, func(j gitlab.Job) string {
-			return j.Stage
-		})
+		printGroupedJobs(jobs)
 
-		for stage, group := range jobsGroupedByStage {
-			log.Printf("=== %s ===", stage)
-			for _, job := range group {
-				log.Printf("%s  %s\n", utils.JobStatusToEmoji(job.Status), job.Name)
+		finishedJobs := make(map[int]gitlab.Job)
+		for _, job := range gitlab.FilterFinishedJobs(jobs) {
+			finishedJobs[job.Id] = job
+		}
+
+		for {
+			jobs, err := gitlab.GetJobs(mergeRequest, cfg.Gitlab, gitlab.FinishedJobStatuses)
+			if err != nil {
+				return err
 			}
+			for _, job := range jobs {
+				if _, exists := finishedJobs[job.Id]; exists {
+					continue
+				}
+				finishedJobs[job.Id] = job
+				log.Printf("update! %s  %s\n", utils.JobStatusToEmoji(job.Status), job.Name)
+			}
+
+			time.Sleep(10 * time.Second)
 		}
 
 		return nil
