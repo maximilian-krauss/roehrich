@@ -83,7 +83,6 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		jobsToComplete := len(jobs)
 		printGroupedJobs(jobs)
 
 		finishedJobs := make(map[int]gitlab.Job)
@@ -104,7 +103,12 @@ var rootCmd = &cobra.Command{
 				printJob(job)
 			}
 
-			if len(finishedJobs) >= jobsToComplete {
+			pipeline, err := gitlab.GetPipeline(mergeRequest, cfg.Gitlab)
+			if err != nil {
+				return err
+			}
+			if !pipeline.IsPendingOrRunning {
+				log.Printf("pipeline changed status to %s", pipeline.Status)
 				break
 			}
 

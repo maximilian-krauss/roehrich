@@ -33,9 +33,10 @@ func CheckToken(config config.GitlabConfig) error {
 }
 
 type Pipeline struct {
-	Id     int    `json:"id"`
-	Iid    int    `json:"iid"`
-	Status string `json:"status"`
+	Id                 int    `json:"id"`
+	Iid                int    `json:"iid"`
+	Status             string `json:"status"`
+	IsPendingOrRunning bool   `json:"-"`
 }
 
 type MergeRequest struct {
@@ -54,6 +55,20 @@ func GetMergeRequest(info *input.MergeRequestInfo, config config.GitlabConfig) (
 	mergeRequest, err := Get(mrPath, config, mergeRequest, nil)
 
 	return mergeRequest, err
+}
+
+func GetPipeline(mr MergeRequest, config config.GitlabConfig) (Pipeline, error) {
+	var pipeline Pipeline
+	var pipelinePath, err = url.JoinPath("projects", strconv.Itoa(mr.ProjectId), "pipelines", strconv.Itoa(mr.Pipeline.Id))
+	if err != nil {
+		return pipeline, err
+	}
+	pipeline, err = Get(pipelinePath, config, mr.Pipeline, nil)
+	if err != nil {
+		return pipeline, err
+	}
+	pipeline.IsPendingOrRunning = slices.Contains(PendingOrRunningJobStatuses, pipeline.Status)
+	return pipeline, err
 }
 
 type Job struct {
