@@ -90,6 +90,8 @@ var rootCmd = &cobra.Command{
 			finishedJobs[job.Id] = job
 		}
 
+		log.Println("waiting for other jobs to complete...")
+
 		for {
 			jobs, err := gitlab.GetJobs(mergeRequest, cfg.Gitlab, gitlab.FinishedJobStatuses)
 			if err != nil {
