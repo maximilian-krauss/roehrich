@@ -30,7 +30,8 @@ func printGroupedJobs(jobs []gitlab.Job) {
 }
 
 func printJob(job gitlab.Job) {
-	log.Printf("%s  %s\n", utils.JobStatusToEmoji(job.Status), job.Name)
+	statusColor := utils.JobStatusToColor(job.Status)
+	log.Printf("%s  %s\n", statusColor.SprintFunc()("["+job.Status+"]"), job.Name)
 }
 
 var rootCmd = &cobra.Command{
