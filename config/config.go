@@ -13,10 +13,18 @@ type GitlabConfig struct {
 }
 
 type Config struct {
-	Gitlab GitlabConfig `json:"gitlab"`
+	Credentials map[string]GitlabConfig `json:"credentials"`
 }
 
 const Filename = ".roehrich.json"
+
+func GetConfigByHostname(hostname string, config Config) (*GitlabConfig, error) {
+	credential, ok := config.Credentials[hostname]
+	if !ok {
+		return nil, fmt.Errorf("no credential for hostname %s", hostname)
+	}
+	return &credential, nil
+}
 
 func LoadConfig() (*Config, error) {
 	homeDir, err := os.UserHomeDir()

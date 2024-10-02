@@ -55,13 +55,18 @@ var rootCmd = &cobra.Command{
 			log.Printf("Found project name %s and merge request id %s", mrInfo.ProjectName, mrInfo.Id)
 		}
 
-		if err := gitlab.CheckToken(cfg.Gitlab); err != nil {
+		gitlabConfig, err := config.GetConfigByHostname(mrInfo.HostName, *cfg)
+		if err != nil {
+			return err
+		}
+
+		if err := gitlab.CheckToken(*gitlabConfig); err != nil {
 			return err
 		} else {
 			log.Println("access token verified")
 		}
 
-		mergeRequest, err := gitlab.GetMergeRequest(mrInfo, cfg.Gitlab)
+		mergeRequest, err := gitlab.GetMergeRequest(mrInfo, *gitlabConfig)
 		if err != nil {
 			return err
 		} else {
@@ -80,7 +85,7 @@ var rootCmd = &cobra.Command{
 			return nil
 		}
 
-		jobs, err := gitlab.GetJobs(mergeRequest, cfg.Gitlab, nil)
+		jobs, err := gitlab.GetJobs(mergeRequest, *gitlabConfig, nil)
 		if err != nil {
 			return err
 		}
@@ -94,7 +99,7 @@ var rootCmd = &cobra.Command{
 		log.Println("waiting for other jobs to complete...")
 
 		for {
-			jobs, err := gitlab.GetJobs(mergeRequest, cfg.Gitlab, gitlab.FinishedJobStatuses)
+			jobs, err := gitlab.GetJobs(mergeRequest, *gitlabConfig, gitlab.FinishedJobStatuses)
 			if err != nil {
 				return err
 			}
@@ -106,7 +111,7 @@ var rootCmd = &cobra.Command{
 				printJob(job)
 			}
 
-			pipeline, err := gitlab.GetPipeline(mergeRequest, cfg.Gitlab)
+			pipeline, err := gitlab.GetPipeline(mergeRequest, *gitlabConfig)
 			if err != nil {
 				return err
 			}

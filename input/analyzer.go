@@ -9,6 +9,7 @@ import (
 type MergeRequestInfo struct {
 	Id          string
 	ProjectName string
+	HostName    string
 }
 
 func GetMRInfo(suppliedUrl string) (*MergeRequestInfo, error) {
@@ -27,6 +28,7 @@ func GetMRInfo(suppliedUrl string) (*MergeRequestInfo, error) {
 	mergeRequestInfo := &MergeRequestInfo{
 		Id:          matches[re.SubexpIndex("id")],
 		ProjectName: matches[re.SubexpIndex("name")],
+		HostName:    parsedUrl.Host,
 	}
 
 	return mergeRequestInfo, nil
