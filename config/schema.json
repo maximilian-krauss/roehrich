@@ -2,23 +2,28 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "gitlab": {
+    "credentials": {
       "type": "object",
-      "properties": {
-        "baseUrl": {
-          "type": "string"
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "baseUrl": {
+            "type": "string"
+          }
         },
-        "token": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "baseUrl",
-        "token"
-      ]
+        "additionalProperties": false,
+        "required": [
+          "token",
+          "baseUrl"
+        ]
+      }
     }
   },
+  "additionalProperties": false,
   "required": [
-    "gitlab"
+    "credentials"
   ]
 }
