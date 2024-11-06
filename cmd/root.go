@@ -6,8 +6,10 @@ import (
 )
 
 const USAGE string = `roerich <flags> <gitlab url>
-  Available flags:
-	- TODO
+  	Available commands:
+		- version
+	Available flags:
+		- interval [seconds]: Specify an interval for polling pipeline updates (default: 10)
 `
 
 func printFatal(err error) {
