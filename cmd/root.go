@@ -25,10 +25,9 @@ func Execute(args []string) {
 	case "version":
 		runVersion()
 	default:
-		err := runStatusCheck(args)
+		err := runStatusCheck()
 		if err != nil {
 			printFatal(err)
 		}
 	}
-
 }

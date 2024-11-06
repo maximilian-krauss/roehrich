@@ -6,7 +6,7 @@ import (
 	"github.com/maximilian-krauss/roehrich/statuscheck"
 )
 
-func runStatusCheck(args []string) error {
+func runStatusCheck() error {
 	interval := flag.Int("interval", 10, "Polling interval in seconds")
 	flag.Parse()
 
