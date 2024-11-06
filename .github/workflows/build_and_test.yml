@@ -19,12 +19,12 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.22'
+        go-version: '1.23'
 
     - name: Build
       run: go build -v ./...
 
-    - uses: dominikh/staticcheck-action@v1.2.0
+    - uses: dominikh/staticcheck-action@v1.3.1
       with:
         version: "2024.1.1"
 
