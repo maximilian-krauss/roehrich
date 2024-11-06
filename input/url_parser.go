@@ -3,8 +3,6 @@ package input
 import (
 	"fmt"
 	"net/url"
-
-	"github.com/pkg/errors"
 )
 
 const (
@@ -12,16 +10,6 @@ const (
 	Job
 	Pipeline
 )
-
-type ParsedUrl struct {
-	url   string
-	uType int
-}
-
-func parseUrl(url string) (*ParsedUrl, error) {
-	fmt.Println(url)
-	return nil, errors.New("Nope")
-}
 
 func ValidateUrl(maybeUrl string) error {
 	parsedUrl, err := url.ParseRequestURI(maybeUrl)
