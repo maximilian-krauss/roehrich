@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"flag"
+	"github.com/maximilian-krauss/roehrich/config"
 	"github.com/maximilian-krauss/roehrich/input"
 	"github.com/maximilian-krauss/roehrich/statuscheck"
 )
 
 func runStatusCheck() error {
 	interval := flag.Int("interval", 10, "Polling interval in seconds")
+	configPath := flag.String("config", config.GetDefaultConfigPath(), "Path to roehrich.yaml")
 	flag.Parse()
 
 	source := flag.Arg(0)
@@ -16,7 +18,9 @@ func runStatusCheck() error {
 	}
 	err := statuscheck.Run(statuscheck.Args{
 		PollingIntervalInSeconds: *interval,
-		SourceUrl:                source})
+		SourceUrl:                source,
+		ConfigPath:               *configPath,
+	})
 
 	if err != nil {
 		return err

@@ -12,6 +12,7 @@ import (
 type Args struct {
 	SourceUrl                string
 	PollingIntervalInSeconds int
+	ConfigPath               string
 }
 
 func printGroupedJobs(jobs []gitlab.Job) {
@@ -33,7 +34,7 @@ func printJob(job gitlab.Job) {
 }
 
 func Run(args Args) error {
-	cfg, err := config.LoadConfig()
+	cfg, err := config.LoadConfig(args.ConfigPath)
 	if err != nil {
 		return err
 	}

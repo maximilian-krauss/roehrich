@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -26,12 +27,15 @@ func GetConfigByHostname(hostname string, config Config) (*GitlabConfig, error) 
 	return &credential, nil
 }
 
-func LoadConfig() (*Config, error) {
+func GetDefaultConfigPath() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return nil, err
+		log.Fatalln(err)
 	}
-	configPath := filepath.Join(homeDir, Filename)
+	return filepath.Join(homeDir, Filename)
+}
+
+func LoadConfig(configPath string) (*Config, error) {
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		return nil, fmt.Errorf("config file %s does not exist", configPath)
 	}

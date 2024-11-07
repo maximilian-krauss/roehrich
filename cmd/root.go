@@ -7,9 +7,10 @@ import (
 
 const USAGE string = `roerich <flags> <gitlab url>
   	Available commands:
-		- version
+		version
 	Available flags:
-		- interval [seconds]: Specify an interval for polling pipeline updates (default: 10)
+		--interval [seconds]	Specify an interval for polling pipeline updates (default: 10)
+		--config PATH	Specify a path to the configuration file (default: $HOME/.roerich.json)
 `
 
 func printFatal(err error) {
