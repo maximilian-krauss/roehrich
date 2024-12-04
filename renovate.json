@@ -12,7 +12,7 @@
     "matchManagers": ["gomod"],
     "matchDepTypes": ["indirect"],
     "enabled": true
-  }]
+  }],
   "rangeStrategy": "pin",
   "automerge": true,
   "platformAutomerge": true
