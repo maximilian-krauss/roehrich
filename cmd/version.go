@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const ApplicationVersion = "0.0.10"
+const ApplicationVersion = "0.0.11"
 
 func runVersion() error {
 	fmt.Printf("Current version: %s\n", ApplicationVersion)
