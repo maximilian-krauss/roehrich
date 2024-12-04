@@ -1,12 +1,13 @@
 package statuscheck
 
 import (
+	"log"
+	"time"
+
 	"github.com/maximilian-krauss/roehrich/config"
 	"github.com/maximilian-krauss/roehrich/gitlab"
 	"github.com/maximilian-krauss/roehrich/input"
 	"github.com/maximilian-krauss/roehrich/utils"
-	"log"
-	"time"
 )
 
 type Args struct {
@@ -49,7 +50,7 @@ func Run(args Args) error {
 		return err
 	}
 
-	if err := gitlab.CheckToken(*gitlabConfig); err != nil {
+	if err := gitlab.CheckToken(*gitlabConfig, false); err != nil {
 		return err
 	}
 	log.Println("access token verified")

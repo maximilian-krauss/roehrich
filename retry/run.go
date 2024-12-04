@@ -29,7 +29,7 @@ func Run(args Args) error {
 		return err
 	}
 
-	if err := gitlab.CheckToken(*gitlabConfig); err != nil {
+	if err := gitlab.CheckToken(*gitlabConfig, true); err != nil {
 		return err
 	}
 	log.Println("access token verified")

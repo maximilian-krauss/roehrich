@@ -6,11 +6,19 @@ import (
 	"net/url"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/maximilian-krauss/roehrich/config"
 	"github.com/maximilian-krauss/roehrich/input"
 	"github.com/maximilian-krauss/roehrich/utils"
 )
+
+const SCOPE_READ_API string = "read_api"
+const SCOPE_READ_USER string = "read_user"
+const SCOPE_API string = "api"
+
+var READ_SCOPES = []string{SCOPE_READ_API, SCOPE_READ_USER, SCOPE_API}
+var WRITE_SCOPES = []string{SCOPE_API}
 
 type PersonalAccessTokenResponse struct {
 	Active  bool     `json:"active"`
@@ -18,7 +26,7 @@ type PersonalAccessTokenResponse struct {
 	Scopes  []string `json:"scopes"`
 }
 
-func CheckToken(config config.GitlabConfig) error {
+func CheckToken(config config.GitlabConfig, needsWriteAccess bool) error {
 	var accessToken PersonalAccessTokenResponse
 	accessToken, err := Get("personal_access_tokens/self", config, accessToken, nil)
 	if err != nil {
@@ -28,8 +36,12 @@ func CheckToken(config config.GitlabConfig) error {
 	if !accessToken.Active || accessToken.Revoked {
 		return errors.New("access token is either revoked or not active")
 	}
-
-	//TODO: Check if response has scope access to: read_api and read_user
+	if !utils.ContainsAll(accessToken.Scopes, READ_SCOPES) {
+		return fmt.Errorf("no read access, token needs at least %s scopes", strings.Join(READ_SCOPES, ","))
+	}
+	if needsWriteAccess && !utils.ContainsAll(accessToken.Scopes, WRITE_SCOPES) {
+		return fmt.Errorf("no write access, token needs at least %s scopes", strings.Join(WRITE_SCOPES, ","))
+	}
 
 	return nil
 }
