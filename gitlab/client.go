@@ -2,12 +2,14 @@ package gitlab
 
 import (
 	"errors"
-	"github.com/maximilian-krauss/roehrich/config"
-	"github.com/maximilian-krauss/roehrich/input"
-	"github.com/maximilian-krauss/roehrich/utils"
+	"fmt"
 	"net/url"
 	"slices"
 	"strconv"
+
+	"github.com/maximilian-krauss/roehrich/config"
+	"github.com/maximilian-krauss/roehrich/input"
+	"github.com/maximilian-krauss/roehrich/utils"
 )
 
 type PersonalAccessTokenResponse struct {
@@ -81,7 +83,7 @@ type Job struct {
 
 func GetJobs(mr MergeRequest, config config.GitlabConfig, jobStatuses []string) ([]Job, error) {
 	var jobs []Job
-	var jobsPath = "/projects/" + strconv.Itoa(mr.ProjectId) + "/pipelines/" + strconv.Itoa(mr.Pipeline.Id) + "/jobs"
+	var jobsPath = fmt.Sprintf("/projects/%d/pipelines/%d/jobs", mr.ProjectId, mr.Pipeline.Id)
 	params := make(map[string]string)
 	jobs, err := GetMany(jobsPath, config, jobs, params)
 	if err != nil {
@@ -96,6 +98,14 @@ func GetJobs(mr MergeRequest, config config.GitlabConfig, jobStatuses []string) 
 	return jobs, err
 }
 
+func RetryJob(mr MergeRequest, config config.GitlabConfig, failedJob Job) (Job, error) {
+	var path = fmt.Sprintf("/projects/%d/jobs/%d/retry", mr.ProjectId, failedJob.Id)
+	var job Job
+	job, err := Post(path, config, job)
+
+	return job, err
+}
+
 func isJobRunningOrPending(job Job) bool {
 	return slices.Contains(PendingOrRunningJobStatuses, job.Status)
 }
@@ -108,4 +118,8 @@ func FilterFinishedJobs(jobs []Job) []Job {
 
 func FilterPendingJobs(jobs []Job) []Job {
 	return utils.Filter(jobs, isJobRunningOrPending)
+}
+
+func FilterFailedJobs(jobs []Job) []Job {
+	return utils.Filter(jobs, func(job Job) bool { return job.Status == "failed" })
 }

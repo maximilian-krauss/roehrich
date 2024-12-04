@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 
 	"github.com/maximilian-krauss/roehrich/config"
@@ -15,17 +16,17 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-func parseAndReturnServerError(path string, responseBody []byte) error {
+func parseAndReturnServerError(stautsCode int, path string, responseBody []byte) error {
 	var errorResponse ErrorResponse
 	err := json.Unmarshal(responseBody, &errorResponse)
 	if err != nil {
 		return err
 	}
 
-	return fmt.Errorf("cannot get %s: %s", path, errorResponse.Message)
+	return fmt.Errorf("request failed %s: %d %s", path, stautsCode, errorResponse.Message)
 }
 
-func makeRequest(config config.GitlabConfig, requestUrl string, queryParameter map[string]string) (*http.Response, []byte, error) {
+func makeRequest(method string, config config.GitlabConfig, requestUrl string, queryParameter map[string]string) (*http.Response, []byte, error) {
 	httpClient := http.Client{}
 	requestUri, err := url.ParseRequestURI(requestUrl)
 	if err != nil {
@@ -39,7 +40,7 @@ func makeRequest(config config.GitlabConfig, requestUrl string, queryParameter m
 		requestUri.RawQuery = query.Encode()
 	}
 
-	request, err := http.NewRequest("GET", requestUri.String(), nil)
+	request, err := http.NewRequest(method, requestUri.String(), nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -58,10 +59,33 @@ func makeRequest(config config.GitlabConfig, requestUrl string, queryParameter m
 	if err != nil {
 		return nil, nil, err
 	}
-	if response.StatusCode != http.StatusOK {
-		return nil, nil, parseAndReturnServerError(requestUrl, body)
+
+	if !slices.Contains([]int{http.StatusOK, http.StatusCreated, http.StatusNoContent}, response.StatusCode) {
+		return nil, nil, parseAndReturnServerError(
+			response.StatusCode,
+			fmt.Sprintf("[%s] %s", method, requestUrl),
+			body,
+		)
 	}
 	return response, body, nil
+}
+
+func Post[TResponse any](path string, config config.GitlabConfig, responseType TResponse) (TResponse, error) {
+	joinedUrl, err := url.JoinPath(config.BaseUrl, path)
+	if err != nil {
+		return responseType, err
+	}
+
+	var tBody TResponse
+	_, body, err := makeRequest("POST", config, joinedUrl, nil)
+	if err != nil {
+		return responseType, err
+	}
+
+	if err := json.Unmarshal(body, &tBody); err != nil {
+		return responseType, err
+	}
+	return tBody, nil
 }
 
 func Get[T any](path string, config config.GitlabConfig, responseType T, queryParameter map[string]string) (T, error) {
@@ -71,7 +95,7 @@ func Get[T any](path string, config config.GitlabConfig, responseType T, queryPa
 	}
 
 	var tBody T
-	_, body, err := makeRequest(config, joinedUrl, queryParameter)
+	_, body, err := makeRequest("GET", config, joinedUrl, queryParameter)
 	if err != nil {
 		return responseType, err
 	}
@@ -100,6 +124,7 @@ func GetMany[T any](path string, config config.GitlabConfig, responseType []T, a
 
 		var tBody []T
 		response, body, err := makeRequest(
+			"GET",
 			config,
 			joinedUrl,
 			queryParameter,
