@@ -1,9 +1,8 @@
 package cmd
 
 import (
+	"errors"
 	"log"
-
-	"github.com/pkg/errors"
 )
 
 const USAGE string = `roerich <flags> <gitlab url>
