@@ -47,7 +47,7 @@ changelog:
 
 brews:
   -
-    name: adr
+    name: roehrich
     homepage: https://github.com/maximilian-krauss/roehrich
     repository:
       owner: maximilian-krauss

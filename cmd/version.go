@@ -6,7 +6,7 @@ import (
 	"github.com/maximilian-krauss/roehrich/update"
 )
 
-const ApplicationVersion = "0.0.14"
+const ApplicationVersion = "0.0.15"
 
 func runVersion() error {
 	fmt.Printf("current version: %s\n", ApplicationVersion)
