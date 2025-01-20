@@ -44,3 +44,15 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
+brews:
+  -
+    name: adr
+    homepage: https://github.com/maximilian-krauss/roehrich
+    repository:
+      owner: maximilian-krauss
+      name: homebrew-roehrich
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    commit_author:
+      name: Maximilian Krauß
+      email: max@krauss.io
