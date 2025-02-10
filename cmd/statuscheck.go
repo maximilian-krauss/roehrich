@@ -10,6 +10,7 @@ import (
 func runStatusCheck() error {
 	interval := flag.Int("interval", 10, "Polling interval in seconds")
 	configPath := flag.String("config", config.GetDefaultConfigPath(), "Path to roehrich.yaml")
+	skipVersionCheck := flag.Bool("skip-version-check", false, "Skip version check")
 	flag.Parse()
 
 	source := flag.Arg(0)
@@ -20,6 +21,7 @@ func runStatusCheck() error {
 		PollingIntervalInSeconds: *interval,
 		SourceUrl:                source,
 		ConfigPath:               *configPath,
+		SkipVersionCheck:         *skipVersionCheck,
 	})
 
 	if err != nil {

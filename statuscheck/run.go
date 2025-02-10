@@ -1,6 +1,9 @@
 package statuscheck
 
 import (
+	"github.com/fatih/color"
+	"github.com/maximilian-krauss/roehrich/static"
+	"github.com/maximilian-krauss/roehrich/update"
 	"log"
 	"time"
 
@@ -14,6 +17,7 @@ type Args struct {
 	SourceUrl                string
 	PollingIntervalInSeconds int
 	ConfigPath               string
+	SkipVersionCheck         bool
 }
 
 func printGroupedJobs(jobs []gitlab.Job) {
@@ -31,7 +35,26 @@ func printGroupedJobs(jobs []gitlab.Job) {
 
 func printJob(job gitlab.Job) {
 	statusColor := utils.JobStatusToColor(job.Status)
-	log.Printf("%s  %s\n", statusColor.SprintFunc()("["+job.Status+"]"), job.Name)
+	log.Printf("%s  %s (%s)\n", statusColor.SprintFunc()("["+job.Status+"]"), job.Name, job.Stage)
+}
+
+func versionCheck(args Args) {
+	if args.SkipVersionCheck {
+		log.Printf("Version check is skipped")
+		return
+	}
+	remoteVersion, err := update.FindLatestVersion(static.ApplicationVersion)
+	if err != nil || remoteVersion == nil {
+		log.Printf("Version check failed: %s", err)
+		return
+	}
+	if remoteVersion.IsNewer {
+		yellow := color.New(color.FgYellow)
+		log.Printf("current version: %s [%s]", static.ApplicationVersion, yellow.Sprintf("%s available", remoteVersion.Version))
+	} else {
+		green := color.New(color.FgGreen)
+		log.Printf("current version: %s [%s]", static.ApplicationVersion, green.Sprint("up to date"))
+	}
 }
 
 func Run(args Args) error {
@@ -39,6 +62,8 @@ func Run(args Args) error {
 	if err != nil {
 		return err
 	}
+	versionCheck(args)
+
 	mrInfo, err := input.GetMRInfo(args.SourceUrl)
 	if err != nil {
 		return err

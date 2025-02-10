@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
-const RELEASE_URL = "https://api.github.com/repos/maximilian-krauss/roehrich/releases/latest"
+const ReleaseUrl string = "https://api.github.com/repos/maximilian-krauss/roehrich/releases/latest"
 
 type GithubRelease struct {
 	TagName string `json:"tag_name"`
@@ -19,7 +19,7 @@ type GithubRelease struct {
 
 func getLatestGithubRelease() (*GithubRelease, error) {
 	httpClient := http.Client{}
-	requestUri, err := url.ParseRequestURI(RELEASE_URL)
+	requestUri, err := url.ParseRequestURI(ReleaseUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func getLatestGithubRelease() (*GithubRelease, error) {
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request to %s failed with status code %d", RELEASE_URL, response.StatusCode)
+		return nil, fmt.Errorf("request to %s failed with status code %d", ReleaseUrl, response.StatusCode)
 	}
 
 	var githubRelease GithubRelease
@@ -63,7 +63,7 @@ type VersionInfo struct {
 func FindLatestVersion(currentVersionString string) (*VersionInfo, error) {
 	latestRelease, err := getLatestGithubRelease()
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	currentVersion, err := version.NewVersion(currentVersionString)
