@@ -1,3 +1,3 @@
 package static
 
-const ApplicationVersion = "0.0.16"
+const ApplicationVersion = "0.0.17"
