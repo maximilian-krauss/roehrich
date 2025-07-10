@@ -3,6 +3,7 @@ package gitlab
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/maximilian-krauss/roehrich/static"
 	"io"
 	"net/http"
 	"net/url"
@@ -48,6 +49,7 @@ func makeRequest(method string, config config.GitlabConfig, requestUrl string, q
 		"Content-Type":  []string{"application/json"},
 		"Accept":        []string{"application/json"},
 		"Authorization": []string{"Bearer " + config.Token},
+		"User-Agent":    []string{"roehrich+v" + static.ApplicationVersion},
 	}
 
 	response, err := httpClient.Do(request)
