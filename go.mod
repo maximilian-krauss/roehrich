@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/fatih/color v1.18.0
 	github.com/hashicorp/go-version v1.7.0
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
