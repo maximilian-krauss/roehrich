@@ -15,5 +15,6 @@
   }],
   "rangeStrategy": "pin",
   "automerge": true,
-  "platformAutomerge": true
+  "platformAutomerge": true,
+  "minimumReleaseAge": "2d"
 }
