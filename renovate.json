@@ -4,15 +4,21 @@
     "config:recommended",
     ":dependencyDashboard"
   ],
-  "baseBranches": [
+  "baseBranchPatterns": [
     "main"
   ],
   "osvVulnerabilityAlerts": true,
-  "packageRules": [{
-    "matchManagers": ["gomod"],
-    "matchDepTypes": ["indirect"],
-    "enabled": true
-  }],
+  "packageRules": [
+    {
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "indirect"
+      ],
+      "enabled": true
+    }
+  ],
   "rangeStrategy": "pin",
   "automerge": true,
   "platformAutomerge": true,
