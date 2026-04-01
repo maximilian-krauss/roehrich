@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/fatih/color v1.19.0
-	github.com/hashicorp/go-version v1.8.0
+	github.com/hashicorp/go-version v1.9.0
 	github.com/stretchr/testify v1.11.1
 )
 
